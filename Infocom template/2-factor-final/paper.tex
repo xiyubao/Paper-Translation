@@ -1,0 +1,164 @@
+%\documentclass{sig-alternate}
+%\documentclass[conference,letterpaper,10pt]{IEEEtran}
+\documentclass[conference]{IEEEtran}
+%\documentclass[letterpaper,twocolumn,10pt]{article}
+%\usepackage{usenix,epsfig,endnotes}
+\pagestyle{plain}
+
+\usepackage{graphicx}
+\usepackage{shortcuts}
+\usepackage{xspace}
+\usepackage{code}
+\usepackage{cite}
+\usepackage{subcaption}
+\usepackage{footnote}
+\usepackage{mathtools}
+\usepackage{url}
+\usepackage{chngcntr}
+\usepackage{listings, color, caption}
+\usepackage{threeparttable}
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{pifont}
+\usepackage{soul}
+\usepackage{boxedminipage}
+
+\usepackage{algorithm,algorithmicx}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\definecolor{lightgray}{rgb}{.9,.9,.9}
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+%\counterwithout{paragraph}{section}
+\usepackage{comment}
+\graphicspath{ {images/} }
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{booktabs}  
+\usepackage{threeparttable} 
+
+
+
+\lstdefinelanguage{JavaScript}{
+    keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+    keywordstyle=\color{blue}\bfseries,
+    ndkeywords={class, export, boolean, throw, implements, import, this},
+    %ndkeywordstyle=\color{darkgray}\bfseries,
+    ndkeywordstyle=\color{green}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{purple}\ttfamily,
+    stringstyle=\color{blue}\ttfamily,
+    morestring=[s]{`}{'},
+%    morestring=[b]"
+}
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
+\lstset{
+    language=JavaScript,
+    backgroundcolor=\color{lightgray},
+    extendedchars=true,
+    basicstyle=\footnotesize\ttfamily,
+    %basicstyle=\footnotesize\sffamily,
+    showstringspaces=false,
+    showspaces=false,
+%    numbers=left,
+%    numberstyle=\footnotesize,
+%    numbersep=9pt,
+    tabsize=2,
+    breaklines=true,
+    showtabs=false,
+    captionpos=b
+    emph={= },
+    emphstyle=\color{green}
+}
+
+\newcommand{\minitab}[2][1]{\begin{tabular}{#1}#2\end{tabular}}
+
+\newcommand{\RN}[1]{%
+  \textup{\uppercase\expandafter{\romannumeral#1}}%
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+
+\algrenewcommand\algorithmicindent{0.7em}%
+
+
+\newcommand\Name{Sentoam }
+\newcommand\name{Sentoam}
+
+\title{\Name : A Sensor-based two-step Authentication Mechanism}
+
+%\author{
+%    \IEEEauthorblockN{Yinhao Xiao\IEEEauthorrefmark{1}, Guangdong Bai\IEEEauthorrefmark{5},IoT Traffic Fuzzing
+%        Jian Mao\IEEEauthorrefmark{3}, Zhenkai Liang\IEEEauthorrefmark{2} and Wei Cheng%\IEEEauthorrefmark{4}}
+
+%    \IEEEauthorblockA{\IEEEauthorrefmark{1}Department of Computer Science, The George Washington %University}
+    
+%    \IEEEauthorblockA{\IEEEauthorrefmark{5}Infocomm Technology Cluster, Singapore Institute of %Technology}
+
+%    \IEEEauthorblockA{\IEEEauthorrefmark{2}School of Computing, National University of Singapore}
+
+%    \IEEEauthorblockA{\IEEEauthorrefmark{3}School of Electronic and Information Engineering, Beihang %University}
+
+%    \IEEEauthorblockA{\IEEEauthorrefmark{4}Department of Computer Science, Virginia Commonwealth %University}
+%}
+%\IEEEpubid{0000--0000/00\$00.00~\copyright~2015 IEEE}
+
+%\IEEEpubid{978-1-5386-1027-5/17/\$31.00~\copyright~2017 IEEE}
+%\IEEEoverridecommandlockouts\IEEEpubid{\makebox[\columnwidth]{978-1-5386-1027-5/17/\$31.00~\copyright~2017 IEEE \hfill} \hspace{\columnsep}\makebox[\columnwidth]{ }}
+
+%\author{
+%    \IEEEauthorblockN{Yaoqi Jia\IEEEauthorrefmark{1},
+%        Xinshu Dong\IEEEauthorrefmark{2}, Zhenkai Liang
+%            \IEEEauthorrefmark{1}, Prateek Saxena\IEEEauthorrefmark{1}}
+%    \IEEEauthorblockA{\IEEEauthorrefmark{1}School of Computing, National University of Singapore
+%       \\ \{jiayaoqi, liangzk, prateeks\}@comp.nus.edu.sg}
+%    \IEEEauthorblockA{\IEEEauthorrefmark{2}Advanced Digital Sciences Center
+%       \\ xinshu.dong@adsc.com.sg}
+%}
+
+%\author{
+%    \IEEEauthorblockN{Yaoqi Jia, Xinshu Dong, Zhenkai Liang, Prateek Saxena}
+%    \IEEEauthorblockA{School of Computing
+%        \\ National University of Singapore
+%        \\\{jiayaoqi, xdong, liangzk, prateeks\}@comp.nus.edu.sg}
+%}
+
+%\author{Yaoqi Jia \and Xinshu Dong \and Zhenkai Liang \and Prateek Saxena}
+%\institute{Department of Computer Science, National University of Singapore\\}
+%\email{\{jiayaoqi, xdong, liangzk, prateeks\}@comp.nus.edu.sg}
+
+
+
+\begin{document}
+\maketitle
+\input{abstract}
+\input{introduction}
+\input{overview}
+\input{approach}
+%\input{configuration}
+\input{implementation}
+%\input{implementation}
+\input{performance}
+\input{related}
+\input{conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{paper}
+
+\end{document}

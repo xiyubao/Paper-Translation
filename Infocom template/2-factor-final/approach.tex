@@ -1,0 +1,261 @@
+\section{Our Approach}
+\label{sec:approach}
+In this section, we mainly describe the details of \name. Firstly, we present the overall structure of \Name and the difference between \Name and the original verification method. Then, we give a brief discussion of three layers of \Name and how to resist the above attack model. The efficacy of these layers is analyzed in Section \uppercase\expandafter{\romannumeral5}. 
+
+
+\subsection{Overall Structure of Our Approach}
+In order to improve the security of the two-step verification, and considering opening the mobile phone to read the verification code and then input the verification code to the login side is a troublesome thing. We present a new two-step authentication that can avoid the phishing attack. Instead of verification code, we use sensor and sound wave information to finish the authentication that need little Human Effort. After considering most of possible scenes and corresponding attack model, we intent to propose a three-layer verification framework to resist the different scenarios and corresponding adversary models, the sensor layer, the ultrasound layer and the the sound layer. 
+
+
+
+
+The main advantage of the sensor layer is to automatically determine whether the environment around the verification device and the login device are consistent. First of all, when the user logs, the web will collect sensor data on the device .Then the web send data and a request to the server, which will ask for the sensor data on the mobile phone through the app installed on the phone later. The trained classifier on the server will determine whether the environment reflected by the two sets of sensor data is consistent.
+
+
+
+
+The second layer is to prevent the attacker from gaining access to the user through tracking to pass the first layer of verification. After the first layer of verification is passed, the server will send the code and a specified set of amplitudes to the phone. The application on the phone converts the code to the corresponding frequency to synthesize the ultrasound with the specified amplitude mentioned above. Then, the user places the mobile phone close to the microphone of the login device, and the mobile phone plays the ultrasonic wave. After the landing device collects the sound waves, the code and relative amplitude are analyzed and sent to the server. The server can determine whether the code is consistent and this login is operated by the user instead of the attacker by a collection of frequencies and amplitudes.
+
+
+
+
+The third layer authentication is to prevent the user's mobile phone from being affixed to the listener or the attacker's login device is extremely close, if the user and the attacker are in the subway or other crowded places at the same time. It's almost similar to the second layer verification, except that this time the server sends the code to the login device, and when the web plays sound waves, the frequency is audible to the human ear.
+
+
+
+
+The overall structure of \Name is shown as Figure \uppercase\expandafter{\romannumeral1}. The detail of these layers and how they resist attack models will be given blow.
+
+
+\subsection{Sensor Layer}
+As described in the overall architecture of \name, the main function of sensor layer is for large-scale screening over long distances. The traditional two-step authentication needs the verification code to complete the authentication. The essence of entering the verification code is to prove that the user owns the mobile phone and the mobile phone is next to the user. Considering the above analysis, we replace the verification code with the sensor information. Through the two sets of sensor information, it can be judged whether the verification device and the login device are in the same environment. In our experiment version, we chose GPS, light sensor, acceleration sensor and orientation sensor. we firstly present two definitions as follow.
+
+\begin{definition}\label{def:enviroment state}
+A state of the environment can be represented as a vector of the values of sensors $S=(s_1, s_2,\cdots,s_n)$, where $n$ is total number of sensors, $s_k$ is a set of values of $k$-th sensor, e.g., $k$-th sensor is the acceleration sensor,  $s_k=(x,y,z)$, where $x$,$y$,$z$ represents the acceleration of the device in three axes.
+\end{definition}
+
+Note that the above three axes are fixed relative to the device. If the phone is placed flat on the table, the direction above the table is the z-axis, the right direction of the screen is the x-axis, and the upper direction of the phone is the y-axis.
+
+\begin{definition}\label{def:data}
+A data contains two environmental states and one flag, which is a manually labeled boolean constant and indicates whether the two environments are consistent  $T=(S^1, S^2, flag)$. data sets will be used to train and validate the classifiers, which can reflect the accuracy of the first layer verification.
+\end{definition}
+
+
+
+
+After proposing the overall idea, the following are the four steps in the process. 
+
+ 
+\begin{itemize}
+  
+  \item \textbf{Training classifier} The classifier is trained in advance, after we have collected enough data. We use a variety of existing classification algorithms, such as Decision Tree algorithm, Support Vector Machine(SVM), Neural Networks, etc. Multiple trained classifiers will be deployed on the server. The details and effect of these classifiers will be mentioned in section . 
+  
+  \item \textbf{Getting sensor data on web} The login interface of the verification side is designed on the web. Web APIs in web technology for developers can be used to get sensor data on devices. When the login starts, the web collects an environmental state $S^1$ and sends it to the server as a request.
+  
+	\item \textbf{Getting sensor data on android} We chose android as the authentication device's operating system because of its open source nature. Sensors on Android are divided into permission-imposed sensors and no-permission-imposed sensors. Any app can access to sensors by calling sensor API. When the App receives a request from the server, it gets an environment status $S^2$ and then sent it to the server.
+	
+	\item \textbf{Server verification} The server now has two environment state $S^1$, $S^2$ obtained from the login and verification devices respectively. Put this two vectors into the classifier. If the output is $True$, the first layer of verification passes. Otherwise, the verification failed.
+  
+\end{itemize}
+
+The overall structure of the first layer is shown as Figure \uppercase\expandafter{\romannumeral2}.
+
+
+\subsection{Ultrasound Layer}
+
+The first layer is relative to the first adversary scene, which the user is in a private place. If the user is in a half-public place, such as lab, coffee house, an attacker may sit near the user and the sensor layer will fail because of sharing the same environment.
+In this case, we propose the second layer verification ,which use near-ultrasonic to carry the verification code.The principle of transmitting code with ultrasound is actually relatively simple. The main process is that the mobile phone encodes the code with a single-frequency sound signal and then plays these single-frequency sounds. After the login end receives the sound, the receiver recognizes the frequency and then decodes the data according to the frequency.  Here we assume that the user's mobile phone is secure and as trustworthy as the server.
+
+
+
+
+Human hearing is limited to sound waves with frequencies below 20 kHz. In previous studies, it was shown that most adults actually cannot hear sounds above 18 kHz\cite{Vitello2006A}\cite{Deshotels2014Inaudible}. Ultrasonic can be used to transmit data and its transmission range is within 9 meters. in other words, the attacker is unable to monitor the ultrasound for verification outside of 9 meter. Here is a problem as follow, the distance of the traditional sound waves can reach 9 meters, which means that even if the user does not notice the attacker, the attacker can receive the verification sound wave if the attacker and the user are in the same room or the attacker placed a listener on the computer used by the user in advance (not the authentication side). Due to this open environment, 9 meters is obviously not a safe distance. Therefore, this layer requires the user to perform a simple operation of bringing the phone closer to the login device when they are logged in. Here, we propose two solutions to solve the following problems by reducing effective transmission distance. 
+
+
+All our solutions are inspired by the damping of air\cite{damping}. As the propagation distance increases, the energy of the sound wave gradually decays in the air until it disappears. 
+
+
+
+The first solution is the server send a command to the mobile phone in addition to the verification code. The app generates the sound wave according to the above description. Then the app modifies the sound wave by modifying the amplitude or adjusting the volume of the phone so that devices outside a certain distance $d$ cannot receive or cannot be resolved. The result of this solution including $d$ will be given in section \uppercase\expandafter{\romannumeral5}.
+
+
+
+The second solution is the upgraded version of the first solution, which is more secure and formalized. We proposal a theoretical algorithm to calculate the distance between the server and the login device. Before we proceed the detail of the algorithm, we first formally present two definitions about ultrasound packet and ultrasound waveform ,which will used in the second solution.
+
+
+
+\begin{definition}\label{def:ultrasound packet}
+An ultrasound package $P=(S, A)$ contains a string $S=(s_1,s_2,\cdots,s_n)$, which is a traditional verification code, and a collection of floating point numbers $A=(a_1, a_2,\cdots,a_n)$. The size of the collection $n$ is the length of the string. The element of the collection $a_k$ represent the relative values of the amplitude of $k$-th character $s_k$.
+
+\end{definition}
+Note that the package was originally initialized by the server and carries a one-time encryption code. Therefore, even if an attacker intercepts a packet or listens to audio information, he cannot use it to pass verification next time.
+
+\begin{definition}\label{def:ultrasound waveform}
+A ultrasound waveform $W=(F,A)$ is a sine wave, which consists of two main elements, frequency and amplitude. In ultrasound transmission, each character corresponds to a different frequency size, $F$ is a collection of frequencies for each character and $A$ is a set of amplitude, where $A_k$ is value of amplitude of the $k$-th frequency $F_k$.
+
+\end{definition}
+Note that each character occupies a time interval, and a portion of the waveform of $W$ at the $k$-th time interval is a sine wave of frequency $F_k$ and amplitude $A_k$. 
+
+\vspace{6pt}
+
+Having defined two main concepts, we present the main process of the ultrasound layer as follow.
+
+\begin{enumerate}
+
+\item The server generates a one-time code $S$ and a set of random floating point numbers $A$ according to the request from the web, which will be combined  into an ultrasonic package $P$ and be sent to the phone. In this example, we assume that the code $S="3123"$
+
+\item The phone encodes the code into a collection of different frequencies through a codebook. For example, we can match the sine wave from 18KHz to 20KHz to the number 1-3. Then the digit string $S=3123$ corresponds to the 4-segment sine wave, and each segment of the sine wave is specified for 100 ms, and $S$ corresponds to the 400 ms sound segment. In first segment of the sine wave, the frequency is $F_1$, which is 18KHz ,and the amplitude is $A_1$. After the sound file is generated, the phone plays it out.
+
+\item The receiver records the sound, analyzes the received sound, and recognizes the four-segment sine wave frequencies $F'=(20KHz, 18kHz, 19kHz, 20kHz)$ and relative amplitude $A'=(A'_1,A'_2,A'_3,A'_4,)$ and then looks up the codebook. The decoded number is $S'=3123$.
+The web side combine $S'$ and $A'$ to a ultrasound package and sent it to the server.
+
+\item We proposal a theoretical algorithm for server to calculate the distance between the phone and the login end. The algorithm takes the ultrasound packages as input, which are packet $P$ sent from the server to the phone and packet $P'$ sent from the web to the server. Then it calculate and verify the distance $s$ between the two devices. The conditions for successful verification are $S=S'$ and $s<x$, which is a suitable threshold of distance.
+\end{enumerate}
+
+Our algorithm is inspired by the damping of air at high frequencies, which specified an analytical method for calculating the attenuation of atmospheric absorption sound under the influence of various environmental factors. For pure tone sounds, which time waveform is a sinusoidal function, the attenuation here is defined as the attenuation caused by atmospheric absorption.
+
+
+
+
+Firstly, we show the formulas for calculating the damping of air as follow.
+
+
+\begin{equation}\label{eq:12}
+\begin{split}
+psat =& pr*10^{-6.8346*(To1/T)^{1.261}+4.6151}\\
+h =& hr*(psat/pa)\\
+frN =& (pa/pr)*(T/To)^{-1/2}*(9+280*h*\\
+     &\exp(-4.170*((T/To)^{-1/3}-1)))\\
+frO =& (pa/pr)*(24+4.4*10^4*h*((0.02+h)\\
+	 &/(0.391+h)))\\
+z =& 0.1068*\exp(-3352/T)*(frN+f^2/frN)^{-1}\\
+y = & (T/To)^{-5/2}*(0.01275*\exp(-2239.1/T)*\\&(frO+f^2/frO)^{-1}+z)\\
+a = & 8.686*f^2*((1.84*10^{-11}*(pa/pr)^{-1}*\\
+	&(T/To)^{-1/2})+y)\\
+as = &a*s\\
+A = &A_0*exp(-as)\\
+\end{split}
+\end{equation}
+
+Note that $a$ means pure-tone sound attenuation coefficient, in $dB/m$, for atmospheric absorption.
+$s$ means distance in $m$ through which the sounds propagates.
+$pa$ means ambient atmospheric pressure in $kPa$.
+$pr$ means reference ambient atmospheric pressure: $101.325 kPa$.
+$psat$ means saturation vapor pressure ,which equals International Meteorological Tables WMO-No.188 TP94 and World Meteorological Organization in Geneva Switzerland.
+$T$ means ambient atmospheric temperature in $K$ (Kelvin), where $ K = 273.15 + Temperature$ in $°C$ (Celsius).
+$To$ means reference temperature in $K$: $293.15 K (20°C)$.
+$To1$ means triple-point isotherm temp: $273.16 K = 273.15 + 0.01 K (0.01°C)$.
+$h$ means molar concentration of water vapor, as a percentage.
+$hr$ means relative humidity as a percentage.
+$f$ means frequency.
+$frO$ means oxygen relaxation frequency.
+$frN$ means nitrogen relaxation frequency.
+$x, y, z$ are help factors to shorten formula.
+$A_0$ is the unattenuated amplitude of the propagating wave at some location. 
+The amplitude $A$ is the reduced amplitude after the wave has traveled a distance $s$ from that initial location
+
+
+
+
+
+
+\begin{table*}[tp]  
+  
+  \centering  
+  \fontsize{6.5}{8}\selectfont  
+  \begin{threeparttable}  
+  \label{tab:table_web_api}  
+    \begin{tabular}{cccccccccccccc}  
+    \toprule  
+    \multirow{2}{*}{\bf Web API}&  
+    \multicolumn{6}{c}{ \bf{Desktop}}&\multicolumn{7}{c}{ \bf{Mobile}}\cr  
+    \cmidrule(lr){2-7} \cmidrule(lr){8-14}  
+    &{\bf Chrome}&{\bf Edge}&{\bf Firefox}&{\bf IE}&{\bf Opera}&{\bf Safari}&{\bf Android}&{\bf Chrome*}&{\bf Edge}&{\bf Firefox*}&{\bf Opera*}&{\bf Safari**}&{\bf Samsung Internet} \cr
+    \midrule
+    \midrule  
+    Navigator.geolocation&5&Yes	& 3.5	& 9	& 16 	& 5	& Yes	& Yes	& Yes	& 4	& 10.6& Yes&	?\cr  
+    DeviceLightEvent&No&Yes&62*&No&No&No&No&No&Yes&62*&No&No&?   \cr
+    DeviceMotionEvent&Yes	& Yes	& 6	&	?	&	?&	?	& Yes	& Yes	& Yes	& 6	&	No	& 4.2& ? \cr  
+    DeviceOrientationEvent&7*& Yes	& * &	?	&	?&	?	& Yes*	& Yes*	& Yes	& 6* &	No &  4.2& ? \cr  
+    \bottomrule  
+    \end{tabular}  
+    \end{threeparttable}  
+    
+  \caption{Browser Compatibility Of Each Web APIs.}  
+\end{table*}  
+
+
+
+
+
+The above formula can be simplified as follow:
+\begin{equation}
+a_0 = \exp(-function(f, T, h, pa)*s)*a*\alpha
+\end{equation}
+Note that there are four environment-dependent unknown numbers for calculating air damping, temperature $T$, relative humidity $h$, atmospheric pressure $pa$ and distance $s$, which can be calculated by three independent variables, frequency $f$, the unattenuated relative amplitude $a_0$ and the attenuated relative amplitude $A$. We also define a unknown number $\alpha$ as follow:
+\begin{equation}
+\alpha=C_0/C
+\end{equation}
+Note that in the computer, the n-bit binary data is used to describe the sound waveform, which is also called the quantization level. n-bit binary number can represent $2^n$ quantization levels, which is an integer range from $-2^{n-1}$ to $2^{n-1}-1$. The values of $C_0$ and $C$ are half of the quantization levels of the login device and the verification device, respectively.
+
+\begin{algorithm}
+\label{alg:distance}
+\caption{Distance Calculating Algorithm in ultrasound layer}
+\hspace*{\algorithmicindent} \textbf{Input:} ultrasound package $P=(S, A)$, ultrasound package $P'=(S', A')$
+\begin{algorithmic}[1]
+\State Initialize a variable $f$ 
+\State Initialize a variable $a_0$
+\State Initialize a variable $a$
+\For{i$=1\cdots n$} 	
+\State $f=S_i$
+\State $a_0=A_i$
+\State $a=A'_i$
+\State Bring $f, a_0, a$ to equation $(2)$ to get the $i$-th equation
+\EndFor
+\State Solving multiple variables based on $n$ equations by Solver
+\Return distance $s$
+\end{algorithmic}
+\end{algorithm}
+
+The structure of the second layer is shown as Figure \uppercase\expandafter{\romannumeral3}.
+
+\section{Sound Layer}
+The first two layers of verification are able to resist most attacks. The third layer is a strong validation to prevent two situations. The first is that the user's authentication device is secretly installed with a listener, and the second is where the user is in a crowded place, such as a bus, so that an attacker can bring the login device closer to the user's mobile phone.
+
+
+
+
+The verification process of the third layer is very similar to that of the second layer as follow:
+
+\begin{enumerate}
+
+\item The server generates an ultrasonic package $P$ and be sent to the login side instead of the phone after the second layer verification is passed.
+
+\item The web encodes the code into a collection of different frequencies through a new codebook, which frequency ranges from 20hz to 18kHz. In other words, the web will play an audible sound.
+
+\item The phone records and analyzes the received sound, and recognizes the frequencies $F'$ and relative amplitude $A'$, then combine $F'$ and $A'$ to a ultrasound package and sent it to the server.
+
+\item In this layer, after receiving the packet, the server does not need to calculate the distance, only need to guarantee $F=F'$
+
+\end{enumerate}
+
+Note that we assume that the phone is on the user, and if the phone can hear the voice from the login, the user can also hear it. If the user finds that he has not verified but has a special sound nearby, the user can interrupt the verification in time by operating the phone.
+
+
+
+
+The overall structure of the third layer is shown as Figure \uppercase\expandafter{\romannumeral4}.
+
+
+
+
+The above analysis shows that we can theoretically resist most of the attacks. Pay attention to our two premise: 
+\begin{enumerate}
+\item The login device is able to accept and recognize the sound wave only when the user's mobile phone is near it.
+\item The user will only bring the mobile phone close to the login device when he wants to verify.
+\end{enumerate}
+
+
+
+
+Therefore, in a half-public scenario, when an attacker performs a login operation, the user does not approach the mobile phone to a public computer that may have a listener. The premise that the user puts the mobile phone close to the public computer is that he is performing the login operation. At this time, even if the attacker receive the sound, he cannot use it because it contains a one-time code. Moreover, if the user correctly enters the account and password, the server will lock the account so that other devices cannot temporarily log in to the account until the 2-step verification is completed.

@@ -1,0 +1,45 @@
+hvlearn
+nexus 灯泡 tool（oauth2 code）
+内部接口
+
+全部授权账户
+网页redirect
+system log
+内存
+8009 ssdp mdns google-cast built in（直接连接，首先通过lan查找然后建立直接连接）
+mod_jk attack
+
+已还原：
+1.踢出去原主人 注册自己的账号 记录语音记录（weak attack 需要只要victim的authorization code）
+2.偷取目标的authorization code 注册到自己的设备 然后控制目标家里的IOT device
+3.weak attack remote attacker 知道tplink账号密码或者是access token （backup channel可以拿）可以远程full control smart bulb
+4.malicious website直接从9999控制灯泡
+**5.首先attacker通过malicious website拿到guest模式（控制明亮等操作），在灯泡关机重启时，attacker可以踢掉victim，把灯泡绑定到自己的账号上。
+6.google home 8008端口明文传输，没有certification，可以造成信息泄露。比如家庭地址。
+
+发现：
+A.拿smart device的info有两种方法：
+	1.带token向服务器请求
+	2.broadcast 9999 {"system":{"get_sysinfo":{}}}
+B.灯泡的operation比如开关灯有两种方法：
+	1.带token向服务器请求
+	2.向9999 发送traffic {"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":{"ignore_default":0,"mode":"normal","on_off":0,"transition_period":0}}}
+
+C.The creditials of KASA app can be retrieved from the backup channel(cite Guangdong Bai's paper)
+
+
+
+next：
+1.8009 ssdp mdns google-cast built in（直接连接，首先通过lan查找然后建立直接连接）
+2.直接traffic控制灯泡 （key开头是0xAB然后XOR迭代加密，现在知道了开关灯和灯泡亮度的语句，下一步是看google home的8009traffic语句）
+3.代码还原google home两步攻击 （ok）
+4.highlevel extraction  
+5.拿到灯泡信息之后 能否与attacker账号绑定 
+
+
+
+
+
+a.reverse 找udp加密或者是压缩方法
+b.找uri的生成方法
+c.分析服务器视频流方法

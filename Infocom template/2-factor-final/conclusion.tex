@@ -1,0 +1,19 @@
+\section{Conclusion}
+Two-step authentication greatly enhances network security due to password leakage, but at the cost of lots of human efforts. Many well-known two-step authentication mechanisms effectively reduce human effort, but each has relative security bugs. In this paper, we present sentoa, a novel sensor-based two-step authentication mechanisms. We have summarized the application scenarios into three types and correspondingly divided \Name into three layers: the sensor layer, the ultrasound layer and the sound layer ,which defeat different attacks from each scenario. For remote attacks, sentoa utilized classifiers based on different machine learning algorithms to distinguish user's log from attacker's log on the server. For proximate attackers, sentoa significantly shortens the effective distance of sound wave transmission and complete the authentication with little human efforts. We evaluated sentoa on several devices in different scenes and regions, .The evaluation show \Name is an effective and convenience approach to defeat both remote attack and proximate attack with little human efforts.
+
+\emph{\textbf{Limitation:}}
+\begin{enumerate}
+\item Most of web sensor APIs are experimental techniques as mentioned above. Due to its poor compatibility with different browsers and operating system, at this stage, part of devices will not support some sensor APIs.
+\item The amplitude of the sound waves played by the mobile phone is not only related to the initial PCM file and the volume of the mobile phone, but also the power of different mobile phone speakers. We will consider and implement this in the future work.
+
+\end{enumerate}
+
+
+
+\emph{\textbf{Future Work:}} We will use more sensors with the development of web technology, such as magnetic field sensor, temperature sensor, humidity sensor and etc. The evaluation of first solution in the ultrasound layer is effective. Therefore, we will evaluation the second solution in the second layer as the updated version of the first solution. Before that, we also need to add parameters such as the power of the speakers and recorders of different devices to \name. 
+
+
+
+Our ultimate goal is to realize that the user sends a mobile phone close to the computer to send a sound wave whose amplitudes are determined by the server. After the server obtains the amplitudes collected by the web side, the distance between the two devices is accurately calculated, regardless of their brand, model and performance.
+
+\label{sec:conclusion}
