@@ -1,0 +1,100 @@
+\section{Implementation}
+\label{sec:implementation}
+
+In this section, we present the implementation details according to Section~\ref{sec:approach}. We first present our implementation of three layers, then we assess the efficacy of each layer in the whole framework.
+
+\subsection{Implementation of the Sensor Layer}
+
+The first layer need two environment states, that is, sensor information that needs to be collected on the mobile phone and the web. The server also needs a pre-trained classifier. In this section, we briefly describe how to get the sensor data on the mobile and the web, then introduce the classification algorithm of the classifier and its implementation. 
+
+\subsubsection{Get sensor data on the phone}
+
+As mentioned before, we have adopted android as the system of user's mobile phone. In Android, apps access to sensors by sending requests via Software Development Kit (SDK) API platform which then registers the App to a corresponding sensor. For most of the sensors, no permission is needed to access these files. For permission-imposed sensors (i.e., camera, microphone, and GPS), a permission is explicitly needed from the user to ensure file access to a specific App.
+
+
+
+
+
+In our experiment, we have chosen four sensors, the light sensor, the GPS, the acceleration sensor and the orientation sensor. The GPS is a permission-imposed sensor, so we need to apply permissions in AndroidManifest.xml file of the App on the phone as follow:
+\texttt{INTERNET}, \texttt{ACCESS\_COARSE\_LOCATION} and \texttt{ACCESS\_FINE\_LOCATION}.
+
+
+
+
+Once we have permission, the app can have access to the corresponding sensor. Firstly, for the other three no-permission-imposed sensors, the application calls the \texttt{getSystemService(Context.SENSOR\_SERVICE)} method to get the Sensor Service, it actually gets an instance of \texttt{SensorManager}.\texttt{SensorManager} registers a different listener event for each sensor. For example, \texttt{SensorManager} call the function \texttt{registerListener()} with three parameters \texttt{LightListener}, \texttt{Sensor.TYPE\_LIGHT} and \texttt{SensorManager.SENSOR\_DELAY\_NORMAL} to register a listener for collecting the light sensor data. For the acceleration and orientation sensors, just change \texttt{Sensor.TYPE\_LIGHT} to \texttt{Sensor.TYPE\_ACCELEROMETER} and \texttt{Sensor.TYPE\_ORIENTATION}. GPS calls are slightly different from other sensors. The instance that the application initialized is \texttt{LocationManager} instead of \texttt{SensorManager}. \texttt{LocationManager} call the function \texttt{requestLocationUpdates()} with four parameters \texttt{LocationManager.GPS\_PROVIDER}, \texttt{minTime}, \texttt{minDistance} and \texttt{locationListener} to call the listener function \texttt{locationListener} to get the position(values of latitude and longitude) of the phone when the user moves more than minDistance meters or after minTime milliseconds.
+
+
+
+
+
+
+\begin{table*}[tp]  
+  
+  \centering  
+  \fontsize{6.5}{8}\selectfont  
+  \begin{threeparttable}  
+  \label{tab:table_mobile}  
+    \begin{tabular}{cccccccccccccc}  
+    \toprule  
+    \multirow{2}{*}{\bf Sensor Type}&  
+    \multicolumn{2}{c}{ \bf{Huawei Nova 2 plus}}&\multicolumn{2}{c}{ \bf{Vivo Y22L}}\cr  
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5}  
+    &{\bf Model}&{\bf Specification}&{\bf Model}&{\bf Specification} \cr
+    \midrule
+    \midrule  
+    Acceleration Sensor&Accelerometer,STMicroelectroics&78.453201 $m/s^2$, 0.23mA&
+    				lis3dh-accel,STMicroelectroics&156.800003 $m/s^2$, 0.01mA  \cr  
+    Orientation Sensor&Gyroscope,STMicroelectronics&34.906584  $rad/s$, 6.1 mA&
+    				YAS533 Gyroscope,Yamaha \cr
+    Light Sensor&Light-ltr578,liteon&10000.0 $lx$, 0.75mA&
+    				APDS9930-light,Avago&6553.0 $lx$, 0.15mA \cr
+
+    \bottomrule  
+    \end{tabular}  
+    \end{threeparttable}  
+    
+  \caption{Browser Compatibility Of Each Web APIs.}  
+\end{table*}  
+
+
+
+
+
+\subsubsection{Get sensor data on the web}
+
+The W3C's Device and Sensors Working Group has released a framework for the Generic Sensor API, so that web APIs in web technology for developers can be used to get sensor data on devices. Despite its poor compatibility with different browsers and operating systems, we have successfully captured the values of the four sensors mentioned above. Take light sensor as an example, we only need to call \texttt{window.addEventListener("devicelight", lightHandler, false)} to register the listener event \texttt{lightHandler}, which parameter is \texttt{event} and its Intraclass variables include the light intensity(lux). Similarly, the acceleration sensor and the orientation sensor corresponding to \texttt{eviceMotionEvent} and \texttt{deviceorientation}.About the location, we called \texttt{navigator.geolocation.watchPosition()},which first parameter \texttt{$updataPosition$} is the listener event function, the second parameter \texttt{getPositionError} is the name of the function called when the error is reported and the third parameter \texttt{enableHighAcuracy} is the accuracy of the location query.
+
+
+
+Part of the interfaces mentioned above are experimental techniques, which compatibility is related to the type and version of the browser and the device on which the browser is located. The browser compatibility table is shown in Table \uppercase\expandafter{\romannumeral2}.
+
+
+
+
+
+\subsubsection{Classifier algorithms}
+
+We use several existing classification algorithms: Decision Tree , SVM ,Kernel-SVM, Logistic Regression, Random Forest, Neural Network including Levenberg-Marquardt Learning, Back-Propagation Learning and Resilient Back-propagation Learning. These algorithms are already implemented in the Accord.Net\cite{accord}, which is a machine learning framework based on .Net.
+
+
+
+
+We wrote the classifier program on \texttt{Visual Studio 2015}.Firstly, we install the necessary package for Accord.Net in \texttt{Nuget}, including \texttt{Accord}, \texttt{Accord.Controls}, \texttt{Accord.MachineLearning}, \texttt{Accord.Math} and \texttt{Accord.Statistics}.
+
+
+
+
+Here, we take the decision tree algorithm as an example to describe the implementation process in detail. For a set of training sets $T_1, T_2,\cdots,T_n$, where $T_k=(S_k^1,S_k^2,flag_k)$. We construct two vectors $Input$ and $Output$, where $Input_k=I_k=|S_k^1-S_k^2|$ and $Output_k=flag_k$.Note that $Input_k$ is also a vector like $S_k^1$ and $S_k^2$, $I_k=|S_k^1-S_k^2|$ means the value of each element in $I_k$ is equal to the absolute value of the difference between the elements of the relative index in $S_k^1$ and $S_k^2$. Considering that the sensor data here is floating point number, we use the C4.5 decision tree algorithm. Firstly, we initialize an instance \texttt{c45} by calling the constructor \texttt{C45Learning}, then we can simply get the trained classifier by calling \texttt{c45.Learn(inputs, outputs)}. The classifier can call \texttt{c45.Decide()} with $Input$ as a parameter to get the $flag$.
+
+
+\subsection{Implementation of ultrasound layer}
+We used an SinVoice SDK\cite{sinvoice} that has been commercialized for sonic communication for ultrasonic transmission in second layer, which can support multiple platform: Android, iOS, Linux, RTOS, OSX and Windows. To test our algorithm, we mainly implemented an app on android by calling the SinVoice APP.
+
+
+
+
+The app mainly contains two features: playing and receiving. First, we initialize an instance of \texttt{SinVoicePlayer} to support playing, call the \texttt{play} function to set the text and other parameters. As with playing, the receiving feature only needs to initialize an \texttt{SinVoiceRecognition} and call \texttt{start} function.
+
+
+
+The focus is on the \texttt{gen} function of \texttt{SinGenerator}, which converts the code into an array of sine waves that are composed of segments of different frequencies and amplitudes. Then the array will be converted to \texttt{PCM} file, which will be played. We can control the effective transmission distance of sound waves by modifying the parameters such as frequency, amplitude, and sampling rate in this function.
